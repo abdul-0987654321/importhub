@@ -131,27 +131,32 @@ const IH = (() => {
   // ════════════════════════════════════════
   // IMGBB UPLOAD
   // ════════════════════════════════════════
-  async function uploadToImgBB(base64OrFile) {
-    try {
-      const formData = new FormData();
-      if (base64OrFile instanceof File || base64OrFile instanceof Blob) {
-        formData.append('image', base64OrFile);
-      } else {
-        const res = await fetch(base64OrFile);
-        const blob = await res.blob();
-        formData.append('image', blob, 'image.jpg');
-      }
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) return data.data.url;
-      return null;
-    } catch(e) {
-      return null;
+  async function uploadToImgBB(base64OrFile, retries = 1) {
+  try {
+    const formData = new FormData();
+    if (base64OrFile instanceof File || base64OrFile instanceof Blob) {
+      formData.append('image', base64OrFile);
+    } else {
+      const res = await fetch(base64OrFile);
+      const blob = await res.blob();
+      formData.append('image', blob, 'image.jpg');
     }
+    const controller = new AbortController();
+    const t = setTimeout(()=>controller.abort(), 50000); // 20s timeout
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal
+    });
+    clearTimeout(t);
+    const data = await res.json();
+    if (data.success) return data.data.url;
+    return null;
+  } catch(e) {
+    if (retries > 0) return uploadToImgBB(base64OrFile, retries - 1);
+    return null;
   }
+}
 
   // ════════════════════════════════════════
   // API CALL
@@ -202,7 +207,7 @@ const IH = (() => {
     // ── STEP 2: Sheets se background mein fresh data fetch karo ──
     try {
       const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout')), 8000)
+        setTimeout(() => reject(new Error('Timeout')), 50000)
       );
 
       const fetchData = Promise.all([
