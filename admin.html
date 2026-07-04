@@ -695,21 +695,22 @@ select.form-control{cursor:pointer;}
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Gallery Images</label>
-            <div class="drop-zone" id="add-gallery-dz" style="margin-bottom:6px;" ondragover="dzOver(event,'add','gallery')" ondragleave="dzLeave('add','gallery')" ondrop="dzDrop(event,'add','gallery')">
-              <input type="file" accept="image/*" multiple onchange="dzFile(event,'add','gallery')"/>
-              <div class="dz-icon">🗂️</div>
-              <div class="dz-text">Multiple images drag karo ya click karo</div>
-              <div class="dz-sub">Ek saath multiple select bhi ho sakta hai</div>
-            </div>
-            <div class="add-gallery-row">
-              <input type="url" class="form-control" id="add-gallery-input" placeholder="https://example.com/img2.jpg"/>
-              <button onclick="addGalleryImg('add')">+ URL</button>
-            </div>
-            <span class="media-limit-badge">Added: <span id="add-gallery-count">0</span> / 10</span>
-            <div class="gallery-list" id="add-gallery-list"></div>
-          </div>
+         <div class="form-group">
+  <label>Gallery Images <span style="font-size:.6rem;background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid rgba(245,158,11,.2);padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:700;">Ctrl+V paste bhi karo</span></label>
+  <div class="drop-zone" id="add-gallery-dz" style="margin-bottom:6px;" ondragover="dzOver(event,'add','gallery')" ondragleave="dzLeave('add','gallery')" ondrop="dzDrop(event,'add','gallery')">
+    <input type="file" accept="image/*" multiple onchange="dzFile(event,'add','gallery')"/>
+    <div class="dz-icon">🗂️</div>
+    <div class="dz-text">Multiple images drag karo ya click karo</div>
+    <div class="dz-sub">Ek saath multiple select bhi ho sakta hai</div>
+  </div>
+  <div class="paste-hint">💡 <kbd>Ctrl</kbd>+<kbd>V</kbd> se mouse yahan rakh kar gallery mein paste karo</div>
+  <div class="add-gallery-row">
+    <input type="url" class="form-control" id="add-gallery-input" placeholder="https://example.com/img2.jpg"/>
+    <button onclick="addGalleryImg('add')">+ URL</button>
+  </div>
+  <span class="media-limit-badge">Added: <span id="add-gallery-count">0</span> / 10</span>
+  <div class="gallery-list" id="add-gallery-list"></div>
+</div>
           <div class="form-group">
             <label>🎬 Product Videos</label>
             <div class="videos-section">
@@ -893,18 +894,21 @@ select.form-control{cursor:pointer;}
       </div>
     </div>
     <div class="form-group">
-      <label>Gallery Images</label>
-      <div class="drop-zone" id="edit-gallery-dz" style="margin-bottom:6px;" ondragover="dzOver(event,'edit','gallery')" ondragleave="dzLeave('edit','gallery')" ondrop="dzDrop(event,'edit','gallery')">
-        <input type="file" accept="image/*" multiple onchange="dzFile(event,'edit','gallery')"/>
-        <div class="dz-icon">🗂️</div><div class="dz-text">Multiple images drag karo ya click karo</div><div class="dz-sub">Multiple select bhi ho sakta hai</div>
-      </div>
-      <div class="add-gallery-row">
-        <input type="url" class="form-control" id="edit-gallery-input" placeholder="https://…"/>
-        <button onclick="addGalleryImg('edit')">+ URL</button>
-      </div>
-      <span class="media-limit-badge">Added: <span id="edit-gallery-count">0</span> / 10</span>
-      <div class="gallery-list" id="edit-gallery-list"></div>
-    </div>
+  <label>Gallery Images <span style="font-size:.6rem;background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid rgba(245,158,11,.2);padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:700;">Ctrl+V paste bhi karo</span></label>
+  <div class="drop-zone" id="edit-gallery-dz" style="margin-bottom:6px;" ondragover="dzOver(event,'edit','gallery')" ondragleave="dzLeave('edit','gallery')" ondrop="dzDrop(event,'edit','gallery')">
+    <input type="file" accept="image/*" multiple onchange="dzFile(event,'edit','gallery')"/>
+    <div class="dz-icon">🗂️</div>
+    <div class="dz-text">Multiple images drag karo ya click karo</div>
+    <div class="dz-sub">Multiple select bhi ho sakta hai</div>
+  </div>
+  <div class="paste-hint">💡 <kbd>Ctrl</kbd>+<kbd>V</kbd> se mouse yahan rakh kar gallery mein paste karo</div>
+  <div class="add-gallery-row">
+    <input type="url" class="form-control" id="edit-gallery-input" placeholder="https://…"/>
+    <button onclick="addGalleryImg('edit')">+ URL</button>
+  </div>
+  <span class="media-limit-badge">Added: <span id="edit-gallery-count">0</span> / 10</span>
+  <div class="gallery-list" id="edit-gallery-list"></div>
+</div>
     <div class="form-group">
       <label>🎬 Product Videos</label>
       <div class="videos-section">
@@ -1187,6 +1191,20 @@ function dzUrlCommit(mode,zone){if(zone==='main'){const url=document.getElementB
 function dzClear(mode,zone){if(zone==='main'){dzMainSrc[mode]=null;document.getElementById(`${mode}-main-preview`).style.display='none';document.getElementById(`${mode}-main-dz`).style.display='flex';document.getElementById(`${mode}-img`).value='';document.getElementById(`${mode}-main-img`).src='';}}
 
 // Paste handler
+// ── Paste target tracking (main ya gallery) ──
+let pasteTarget = { add: 'main', edit: 'main' };
+function setPasteTarget(mode, target){ pasteTarget[mode] = target; }
+
+['add','edit'].forEach(mode=>{
+  const mainDz = document.getElementById(`${mode}-main-dz`);
+  const mainPrev = document.getElementById(`${mode}-main-preview`);
+  const galDz = document.getElementById(`${mode}-gallery-dz`);
+  const galList = document.getElementById(`${mode}-gallery-list`);
+  [mainDz, mainPrev].forEach(el=> el && el.addEventListener('mouseenter', ()=>setPasteTarget(mode,'main')));
+  [galDz, galList].forEach(el=> el && el.addEventListener('mouseenter', ()=>setPasteTarget(mode,'gallery')));
+});
+
+// Paste handler
 document.addEventListener('paste', function(e) {
   const tag = e.target.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -1195,9 +1213,14 @@ document.addEventListener('paste', function(e) {
   if (!imgItem) return;
   const mode = document.getElementById('editModal').classList.contains('open') ? 'edit' : 'add';
   const file = imgItem.getAsFile();
-  dzSetMainFromFile(file, mode);  // ← yeh change kiya
+  const target = pasteTarget[mode] || 'main';
+  if (target === 'gallery') {
+    uploadAndAddGalleryFromFile(mode, file);
+    toast('✅ Gallery mein paste ho gaya!');
+  } else {
+    dzSetMainFromFile(file, mode);
+  }
 });
-
 // ── GALLERY: select hone par turant ImgBB upload ──
 async function uploadAndAddGallery(mode, src) {
   const items = mode === 'add' ? addGalleryItems : editGalleryItems;
@@ -1492,8 +1515,9 @@ async function submitAddProduct() {
   const description = document.getElementById('add-description').value.trim();
   const specs = getSpecsObject('add');
   const videos = getVideosArray('add');
+  const finalEmoji = emoji || CAT_EMOJI[type] || '📦';
 
-  if (!name || !price || !emoji || !type) { toast('❌ Fill required fields', 'error'); return; }
+if (!name || !price || !type) { toast('❌ Fill required fields', 'error'); return; }
 
   // Upload chal raha hai? Ruko
   if (isUploading('add')) {
@@ -1512,11 +1536,11 @@ async function submitAddProduct() {
   const imgUrl = document.getElementById('add-img').value.trim();
 
   IH.addProduct({
-    name, emoji, type, price, cost, stock, badge, rating, reviews,
-    img: imgUrl,
-    gallery: [...addGalleryItems.filter(s => !s.startsWith('data:'))],
-    videos, description, specs, details: [], reviews_list: []
-  });
+  name, emoji: finalEmoji, type, price, cost, stock, badge, rating, reviews,
+  img: imgUrl,
+  gallery: [...addGalleryItems.filter(s => !s.startsWith('data:'))],
+  videos, description, specs, details: [], reviews_list: []
+});
 
   toast('✅ Product added: ' + name);
   ['add-name','add-emoji','add-price','add-cost','add-stock',
