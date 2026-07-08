@@ -37,6 +37,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(248,249,250,.95);backdrop-
 
 .nav-right{display:flex;align-items:center;gap:14px;}
 .wa-btn-nav{background:linear-gradient(135deg,var(--accent),#ff6b7a);color:#fff;padding:10px 22px;border-radius:50px;font-size:.88rem;font-weight:700;border:none;display:flex;align-items:center;gap:8px;transition:.3s;text-decoration:none;box-shadow:var(--shadow);}
+.cart-btn{position:relative;background:#fff;color:var(--ink);border:1px solid var(--border);padding:9px 13px;border-radius:40px;cursor:pointer;font-size:17px;line-height:1;transition:.2s;}
+.cart-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
 .wa-btn-nav:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(255,71,87,.3);}
 
 .hamburger{display:none;background:none;border:none;cursor:pointer;font-size:1.4rem;transition:.3s;}
@@ -179,6 +182,9 @@ section{padding:90px 5%;}
 .product-footer{display:flex;align-items:center;justify-content:space-between;}
 .price{font-family:'JetBrains Mono',monospace;font-size:.96rem;font-weight:800;color:var(--accent);}
 .view-btn{background:var(--accent);color:#fff;padding:6px 14px;border-radius:8px;font-size:.78rem;font-weight:700;border:none;cursor:pointer;transition:.3s;}
+.product-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.add-cart-btn{background:var(--ink);color:#fff;padding:6px 12px;border-radius:8px;font-size:.75rem;font-weight:700;border:none;cursor:pointer;transition:.3s;}
+.add-cart-btn:hover{background:var(--accent);}
 .view-btn:hover{background:#ff6b7a;transform:scale(1.08);}
 
 /* ════════════════════════ WHY ════════════════════════ */
@@ -268,7 +274,8 @@ display:block;
     <li><a href="about.html">About</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
-  <div class="nav-right">
+  <div class="nav-right" style="display:flex;align-items:center;gap:12px;">
+    <button onclick="Cart.openDrawer()" class="cart-btn" aria-label="Cart">🛒<span class="cart-count">0</span></button>
     <a class="wa-btn-nav" href="https://wa.me/923137666766" target="_blank">💬 WhatsApp</a>
     <button class="hamburger" onclick="toggleMenu()">☰</button>
   </div>
@@ -440,6 +447,7 @@ display:block;
 <a class="wa-float" href="https://wa.me/923137666766?text=Hello! I'm interested in ImportHub products." target="_blank">💬</a>
 
 <script src="data.js"></script>
+<script src="cart.js"></script>
 <script>
 let currentTab = 'tech';
 
@@ -480,7 +488,10 @@ function renderProducts(tab) {
         <h4>${p.name}</h4>
         <div class="product-footer">
           <span class="price">${IH.pkr(p.price)}</span>
-          <button class="view-btn" onclick="event.stopPropagation();goToProduct('${p.id}')">View →</button>
+          <div style="display:flex;gap:6px;">
+            <button class="add-cart-btn" onclick='event.stopPropagation();Cart.add(${JSON.stringify({id:p.id,name:p.name,price:p.price,img:p.img,emoji:p.emoji}).replace(/'/g,"&#39;")});'>🛒 Add</button>
+            <button class="view-btn" onclick="event.stopPropagation();goToProduct('${p.id}')">View →</button>
+          </div>
         </div>
       </div>
     </div>`;
