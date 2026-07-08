@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Checkout – ImportHub</title>
+<link rel="shortcut icon" href="https://i.ibb.co/kVTNhYVJ/253481a36603.png" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+<!-- ══════════════════════════════════════════════
+     EMAILJS — apna account https://www.emailjs.com per bana kar
+     neeche teeno values apni asli values se replace karo:
+     1) emailjs.init("YOUR_PUBLIC_KEY")
+     2) EMAILJS_SERVICE_ID
+     3) EMAILJS_TEMPLATE_CUSTOMER / EMAILJS_TEMPLATE_STORE
+     ══════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>emailjs.init("MaLTRfbrp-vswyVy6");</script>
+
+<style>
+:root{
+  --bg:#f8f9fa;--bg2:#ecf0f5;--bg3:#ffffff;
+  --ink:#0f1419;--ink2:#4a5568;--ink3:#8892a8;
+  --accent:#ff4757;--accent2:#ffa502;--accent3:#26de81;
+  --border:#e0e6ed;--border2:#e8ecf1;--radius:14px;
+  --shadow:0 4px 12px rgba(15,20,25,.08);--shadow2:0 8px 32px rgba(15,20,25,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;min-height:100vh;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(248,249,250,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:72px;}
+.nav-logo{font-family:'Outfit',sans-serif;font-weight:900;font-size:1.6rem;color:var(--ink);letter-spacing:-1px;display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo .dot{width:10px;height:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;}
+.back-link{color:var(--ink2);text-decoration:none;font-weight:600;font-size:.9rem;}
+.back-link:hover{color:var(--accent);}
+
+.container{max-width:1100px;margin:50px auto;padding:0 5%;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;}
+form{background:var(--bg3);padding:32px;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);}
+h2{font-size:1.3rem;margin-bottom:18px;font-weight:800;font-family:'Outfit',sans-serif;}
+input,textarea,select{width:100%;padding:13px 16px;margin-bottom:14px;border:1px solid var(--border);border-radius:12px;outline:none;font-size:.92rem;background:var(--bg);font-family:'Inter',sans-serif;transition:.2s;}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,71,87,.1);background:#fff;}
+select{cursor:pointer;}
+label.field-label{display:block;font-size:.78rem;font-weight:700;color:var(--ink2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+
+.summary{background:var(--bg3);padding:26px;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);position:sticky;top:96px;height:fit-content;}
+#itemsBox{max-height:300px;overflow:auto;padding-right:4px;}
+.cart-line{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border2);}
+.cart-line img,.cart-line .emoji{width:44px;height:44px;border-radius:8px;object-fit:contain;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.cart-line .ln-info{flex:1;font-size:.85rem;}
+.cart-line .ln-info b{display:block;font-size:.86rem;margin-bottom:2px;}
+.cart-line .ln-qty{display:flex;align-items:center;gap:6px;}
+.cart-line .ln-qty button{width:22px;height:22px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:.85rem;line-height:1;}
+.cart-line .ln-remove{color:var(--accent);font-size:.72rem;cursor:pointer;background:none;border:none;text-decoration:underline;margin-top:2px;}
+.row{display:flex;justify-content:space-between;margin-top:12px;font-size:.95rem;font-weight:700;}
+.place-order{width:100%;padding:15px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--accent),#ff6b7a);color:#fff;font-weight:800;cursor:pointer;transition:.3s;margin-top:14px;font-size:15px;font-family:'Inter',sans-serif;}
+.place-order:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(255,71,87,.3);}
+.place-order:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.empty-cart{text-align:center;padding:30px;color:var(--ink3);}
+.empty-cart a{color:var(--accent);font-weight:700;text-decoration:none;}
+
+#loadingPopup{display:none;position:fixed;inset:0;background:rgba(15,20,25,.6);backdrop-filter:blur(6px);justify-content:center;align-items:center;z-index:9999;}
+#loadingPopup .box{background:#fff;padding:28px 38px;border-radius:16px;text-align:center;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.2);}
+#loadingPopup small{display:block;margin-top:6px;color:var(--ink3);font-weight:500;}
+
+@media(max-width:900px){.container{grid-template-columns:1fr;}.summary{position:relative;top:auto;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">ImportHub <span class="dot"></span></a>
+  <a class="back-link" href="shop.html">← Continue Shopping</a>
+</nav>
+
+<div class="container">
+  <form id="checkoutForm">
+    <h2>Shipping Details</h2>
+    <label class="field-label" for="name">Full Name</label>
+    <input type="text" id="name" placeholder="e.g. Ahmed Khan" required>
+
+    <label class="field-label" for="phone">Phone Number</label>
+    <input type="tel" id="phone" placeholder="03XX-XXXXXXX" required>
+
+    <label class="field-label" for="email">Email Address</label>
+    <input type="email" id="email" placeholder="you@example.com" required>
+
+    <label class="field-label" for="address">Full Address</label>
+    <textarea id="address" rows="2" placeholder="House #, Street, Area" required></textarea>
+
+    <label class="field-label" for="city">City</label>
+    <input type="text" id="city" placeholder="e.g. Rawalpindi" required>
+
+    <label class="field-label" for="notes">Order Notes (optional)</label>
+    <textarea id="notes" rows="2" placeholder="Any special instructions..."></textarea>
+
+    <h2>Payment</h2>
+    <select id="payment">
+      <option value="COD">Cash on Delivery</option>
+    </select>
+
+    <button type="submit" class="place-order" id="placeOrderBtn">Place Order</button>
+  </form>
+
+  <div class="summary">
+    <h2>Order Summary</h2>
+    <div id="itemsBox"></div>
+    <hr style="margin-top:14px;border:none;border-top:1px solid var(--border2);">
+    <div class="row"><span>Subtotal</span><strong id="subtotalDisp">Rs. 0</strong></div>
+    <div class="row" style="margin-top:10px;padding-top:10px;border-top:2px solid var(--border2);"><span>Total</span><strong id="total" style="color:var(--accent);font-size:1.15rem;">Rs. 0</strong></div>
+  </div>
+</div>
+
+<div id="loadingPopup">
+  <div class="box">⏳ Processing your order...<small>Please wait</small></div>
+</div>
+
+<script src="data.js"></script>
+<script src="cart.js"></script>
+<script>
+// ═══════════════════════════════════
+// EMAILJS CONFIG — apni values yahan daalo
+// ═══════════════════════════════════
+const EMAILJS_SERVICE_ID        = 'service_ji8s51m';
+const EMAILJS_TEMPLATE_CUSTOMER = 'template_gdkl6du';
+const EMAILJS_TEMPLATE_STORE    = 'template_pcbx5ys';
+
+// ═══════════════════════════════════
+// RENDER CART
+// ═══════════════════════════════════
+function renderCart() {
+  const cart = Cart.get();
+  const box  = document.getElementById('itemsBox');
+
+  if (cart.length === 0) {
+    box.innerHTML = '<div class="empty-cart">Your cart is empty.<br><a href="shop.html">Go shopping →</a></div>';
+    document.getElementById('placeOrderBtn').disabled = true;
+    updateTotal();
+    return;
+  }
+
+  document.getElementById('placeOrderBtn').disabled = false;
+  box.innerHTML = cart.map(function (p) {
+    const img = p.image
+      ? '<img src="' + p.image + '" onerror="this.style.display=\'none\'"/>'
+      : '<span class="emoji">' + (p.emoji || '📦') + '</span>';
+    return '<div class="cart-line">' + img +
+      '<div class="ln-info"><b>' + p.name + '</b>Rs. ' + Number(p.price).toLocaleString() +
+      '<div class="ln-qty">' +
+        '<button type="button" onclick="Cart.qty(\'' + p.id + '\', ' + (p.qty - 1) + ');renderCart();">−</button>' +
+        '<span>' + p.qty + '</span>' +
+        '<button type="button" onclick="Cart.qty(\'' + p.id + '\', ' + (p.qty + 1) + ');renderCart();">+</button>' +
+      '</div>' +
+      '<button type="button" class="ln-remove" onclick="Cart.remove(\'' + p.id + '\');renderCart();">Remove</button>' +
+      '</div>' +
+      '<div style="font-weight:700;font-size:.85rem;">Rs. ' + (p.price * p.qty).toLocaleString() + '</div>' +
+    '</div>';
+  }).join('');
+
+  updateTotal();
+}
+
+function updateTotal() {
+  const subtotal = Cart.total();
+  document.getElementById('subtotalDisp').textContent = 'Rs. ' + subtotal.toLocaleString();
+  document.getElementById('total').textContent        = 'Rs. ' + subtotal.toLocaleString();
+}
+
+// ═══════════════════════════════════
+// FORM SUBMIT
+// ═══════════════════════════════════
+document.getElementById('checkoutForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const cart = Cart.get();
+  if (cart.length === 0) { alert('Your cart is empty!'); return; }
+
+  const btn = document.getElementById('placeOrderBtn');
+  btn.disabled = true;
+  showLoading();
+
+  const orderId  = 'IH-' + Date.now();
+  const subtotal = Cart.total();
+
+  const items = cart.map(function (p) {
+    return { id: p.id, name: p.name, price: p.price, qty: p.qty };
+  });
+  const itemsText = cart.map(function (p) {
+    return '• ' + p.name + ' x' + p.qty + ' = Rs ' + (p.price * p.qty).toLocaleString();
+  }).join('\n');
+
+  const order = {
+    order_id: orderId,
+    name:     document.getElementById('name').value,
+    phone:    document.getElementById('phone').value,
+    email:    document.getElementById('email').value,
+    address:  document.getElementById('address').value,
+    city:     document.getElementById('city').value,
+    notes:    document.getElementById('notes').value,
+    payment:  document.getElementById('payment').value,
+    items:    items,
+    subtotal: subtotal,
+    shipping: 0,
+    total:    subtotal,
+  };
+
+  try {
+    // 1) Google Sheet mein order save karo + stock update — sirf isi ka wait karo,
+    //    ye order confirm hone ke liye zaroori hai
+    await IH.placeOrder(order);
+
+    // Order confirm ho gaya — user ko turant thankyou page pe bhej do,
+    // emails ka wait mat karo (unhe background mein bhej denge)
+    Cart.clear();
+    hideLoading();
+    window.location.href = 'thankyou.html';
+
+    // 2) EmailJS se customer + store ko emails background mein bhejo (fire-and-forget).
+    //    Ye page redirect hone ke baad bhi complete ho jayenge kyunki request already
+    //    network ko bhej di gayi hai.
+    const emailPayload = {
+      order_id: orderId,
+      name:     order.name,
+      phone:    order.phone,
+      email:    order.email,
+      address:  order.address,
+      city:     order.city,
+      notes:    order.notes,
+      total:    'Rs ' + subtotal.toLocaleString(),
+      items:    itemsText,
+    };
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOMER, emailPayload)
+      .catch(function (err) { console.error('Customer email failed:', err); });
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_STORE, emailPayload)
+      .catch(function (err) { console.error('Store email failed:', err); });
+
+  } catch (error) {
+    console.error(error);
+    hideLoading();
+    btn.disabled = false;
+    alert('❌ Order failed. Please try again or order via WhatsApp.');
+  }
+});
+
+function showLoading() { document.getElementById('loadingPopup').style.display = 'flex'; }
+function hideLoading()  { document.getElementById('loadingPopup').style.display = 'none'; }
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+IH.init();
+renderCart();
+window.addEventListener('cart_updated', renderCart);
+</script>
+</body>
+</html>

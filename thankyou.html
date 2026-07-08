@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Order Confirmed – ImportHub</title>
+<link rel="shortcut icon" href="https://i.ibb.co/kVTNhYVJ/253481a36603.png" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f8f9fa;--bg2:#ecf0f5;--bg3:#ffffff;
+  --ink:#0f1419;--ink2:#4a5568;--ink3:#8892a8;
+  --accent:#ff4757;--accent2:#ffa502;--accent3:#26de81;
+  --border:#e0e6ed;--border2:#e8ecf1;--radius:14px;
+  --shadow:0 4px 12px rgba(15,20,25,.08);--shadow2:0 8px 32px rgba(15,20,25,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:30px 16px;}
+
+.card{background:#fff;padding:44px 36px;border-radius:22px;text-align:center;max-width:480px;width:100%;box-shadow:var(--shadow2);animation:pop .5s ease;}
+@keyframes pop{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.check{width:84px;height:84px;margin:0 auto 18px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;justify-content:center;align-items:center;color:#fff;font-size:38px;}
+
+h1{font-family:'Outfit',sans-serif;font-size:1.6rem;margin-bottom:8px;}
+.order-id{font-weight:800;color:var(--accent);font-size:1.05rem;margin-bottom:14px;}
+p.lead{color:var(--ink2);line-height:1.6;font-size:.94rem;margin-bottom:20px;}
+
+/* On-screen receipt look (still a nice card, monospace inside) */
+.receipt{text-align:left;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:22px;font-family:'Courier New', monospace;font-size:.78rem;line-height:1.55;color:var(--ink2);}
+.r-line{white-space:pre;overflow:hidden;color:var(--ink3);}
+.r-center{text-align:center;}
+.r-bold{font-weight:700;color:var(--ink);}
+.r-row{display:flex;justify-content:space-between;gap:8px;}
+.r-row span:first-child{word-break:break-word;}
+.r-row span:last-child{flex-shrink:0;white-space:nowrap;text-align:right;}
+.r-total{font-size:.95rem;margin-top:2px;}
+.receipt-item-name{word-break:break-word;}
+
+.btn{display:block;margin-top:12px;padding:14px;border-radius:50px;text-decoration:none;font-weight:700;font-size:.92rem;transition:.3s;}
+.primary{background:linear-gradient(135deg,var(--accent),#ff6b7a);color:#fff;}
+.primary:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(255,71,87,.3);}
+.secondary{background:var(--bg2);color:var(--ink);}
+.secondary:hover{background:#e2e6ec;}
+.small{font-size:.78rem;margin-top:14px;color:var(--ink3);}
+.print-btn{background:none;border:1px solid var(--border);color:var(--ink2);border-radius:50px;padding:10px;font-size:.85rem;font-weight:600;cursor:pointer;margin-top:12px;width:100%;}
+.print-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+@media print{ body *{visibility:hidden;} .card,.card *{visibility:visible;} .btn,.print-btn{display:none;} .card{box-shadow:none;position:absolute;left:0;top:0;} }
+
+@media print{
+  @page{ size:58mm 200mm; margin:0; }
+
+  html, body{
+    width:58mm !important;
+    margin:0 !important;
+    padding:0 !important;
+    background:#fff !important;
+    display:block !important;
+    min-height:auto !important;
+    justify-content:unset !important;
+    align-items:unset !important;
+  }
+
+  .card{
+    width:58mm !important; max-width:58mm !important; margin:0 !important;
+    padding:0 !important; border:none !important; box-shadow:none !important;
+    display:block !important;
+  }
+
+  .check, .order-id, h1, .lead, .btn, .print-btn, .small{ display:none !important; }
+
+  .receipt{
+    display:block !important; width:100% !important; margin:0 !important;
+    padding:2mm 3mm !important; border:none !important; background:#fff !important;
+    font-family:'Courier New', monospace !important; font-size:11px !important; line-height:1.5 !important;
+    color:#000 !important;
+  }
+
+  .r-line{ white-space:pre; overflow:hidden; font-size:10px; color:#000; }
+  .r-center{ text-align:center; }
+  .r-bold{ font-weight:700; color:#000; }
+  .r-row{ display:flex; justify-content:space-between; gap:6px; }
+  .r-row span:first-child{ flex:1; word-break:break-word; }
+  .r-row span:last-child{ flex-shrink:0; white-space:nowrap; text-align:right; }
+  .r-total{ font-size:12px; }
+  .receipt-item-name{ word-break:break-word; }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="check">✓</div>
+  <div class="order-id">Order ID: <span id="orderId">—</span></div>
+  <h1>Thank You! 🎉</h1>
+  <p class="lead">Your order has been placed successfully. We've sent a confirmation to your email and will contact you shortly to confirm delivery.</p>
+
+  <div class="receipt" id="receipt">
+    <div class="r-line">============================</div>
+    <div class="r-center r-bold">IMPORTHUB</div>
+    <div class="r-center">www.importhub.online</div>
+    <div class="r-line">============================</div>
+    <div id="receiptDate"></div>
+    <div class="r-line">----------------------------</div>
+    <div class="r-row r-bold"><span>ITEM</span><span>AMT</span></div>
+    <div class="r-line">----------------------------</div>
+    <div id="receiptItems"></div>
+    <div class="r-line">----------------------------</div>
+    <div class="r-row"><span>Subtotal:</span><span id="receiptSubtotal">Rs. 0</span></div>
+    <div class="r-row"><span>Delivery:</span><span id="receiptDelivery">0</span></div>
+    <div class="r-line">----------------------------</div>
+    <div class="r-row r-bold r-total"><span>TOTAL:</span><span id="receiptTotal">Rs. 0</span></div>
+    <div class="r-line">============================</div>
+    <div id="receiptMeta"></div>
+    <div class="r-line">============================</div>
+    <div class="r-center">Thank you for shopping!</div>
+    <div class="r-center">ImportHub will contact</div>
+    <div class="r-center">you shortly</div>
+    <div class="r-line">============================</div>
+  </div>
+
+  <button class="print-btn" onclick="window.print()">🖨️ Print / Save Receipt</button>
+  <a href="index.html" class="btn primary">Continue Shopping</a>
+  <a href="shop.html" class="btn secondary">Go to Shop</a>
+
+  <div class="small">ImportHub Team will confirm your order shortly 💬</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const orderId = localStorage.getItem('ih_last_order_id');
+  document.getElementById('orderId').textContent = orderId || 'IH-ERROR';
+
+  if (!orderId) return;
+
+  // Order detail localStorage cache se nikalo (IH.placeOrder ne save kiya tha)
+  let order = null;
+  try {
+    const orders = JSON.parse(localStorage.getItem('ih_orders_cache')) || [];
+    order = orders.find(o => o.order_id === orderId);
+  } catch (e) {}
+
+  if (!order) return;
+
+  // Date
+  const now = new Date();
+  document.getElementById('receiptDate').textContent =
+    'Date: ' + now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+
+  // Items
+  document.getElementById('receiptItems').innerHTML = (order.items || []).map(function (it) {
+    const lineTotal = (it.price * it.qty).toLocaleString();
+    return '<div class="receipt-item-name">' + it.name + '</div>' +
+      '<div class="r-row"><span>&nbsp;&nbsp;' + it.qty + ' x ' + it.price.toLocaleString() + '</span><span>' + lineTotal + '</span></div>';
+  }).join('');
+
+  const subtotal = Number(order.total || 0);
+  const delivery = Number(order.delivery || 0);
+  const grandTotal = subtotal + delivery;
+
+  document.getElementById('receiptSubtotal').textContent = 'Rs. ' + subtotal.toLocaleString();
+  document.getElementById('receiptDelivery').textContent = delivery.toLocaleString();
+  document.getElementById('receiptTotal').textContent = 'Rs. ' + grandTotal.toLocaleString();
+
+  document.getElementById('receiptMeta').innerHTML =
+    'Customer: ' + (order.name || 'Customer') + '<br>' +
+    'Address:  ' + (order.address || '') + ', ' + (order.city || '') + '<br>' +
+    'Phone:    ' + (order.phone || '') + '<br>' +
+    'Payment:  ' + (order.payment === 'COD' ? 'Cash on Delivery' : (order.payment || 'COD'));
+});
+
+// Dynamic page height taake print pe khaali white space na aaye
+function setPrintPageSize() {
+  const receipt = document.getElementById('receipt');
+  if (!receipt) return;
+  const heightPx = receipt.scrollHeight;
+  const heightMm = (heightPx / 96) * 25.4;
+  const finalHeightMm = Math.ceil(heightMm) + 4;
+
+  let styleTag = document.getElementById('dynamicPageSize');
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'dynamicPageSize';
+    document.head.appendChild(styleTag);
+  }
+  styleTag.innerHTML = `@page{ size:58mm ${finalHeightMm}mm; margin:0; }`;
+}
+
+window.addEventListener('beforeprint', setPrintPageSize);
+document.querySelector('.print-btn').addEventListener('click', setPrintPageSize);
+</script>
+</body>
+</html>
