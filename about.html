@@ -147,6 +147,53 @@ footer{background:linear-gradient(135deg,var(--ink),#1a2332);color:rgba(255,255,
   .footer-grid{grid-template-columns:1fr;}
   .cta-btns{flex-direction:column;}
 }
+.cart-btn{
+
+position:relative;
+
+background:#ff4757;
+
+color:white;
+
+border:none;
+
+padding:10px 15px;
+
+border-radius:40px;
+
+cursor:pointer;
+
+font-size:18px;
+
+}
+
+.cart-count{
+
+position:absolute;
+
+top:-6px;
+
+right:-6px;
+
+background:red;
+
+width:22px;
+
+height:22px;
+
+border-radius:50%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:12px;
+
+font-weight:bold;
+
+}
 </style>
 </head>
 <body>
@@ -159,6 +206,13 @@ footer{background:linear-gradient(135deg,var(--ink),#1a2332);color:rgba(255,255,
     <li><a class="active">About</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
+  <button onclick="Cart.openDrawer()" class="cart-btn">
+
+🛒
+
+<span class="cart-count">0</span>
+
+</button>
   <div style="display:flex;align-items:center;gap:14px;">
     <a class="wa-btn-nav" href="https://wa.me/923137666766" target="_blank">💬 WhatsApp</a>
     <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">☰</button>
@@ -266,6 +320,7 @@ footer{background:linear-gradient(135deg,var(--ink),#1a2332);color:rgba(255,255,
 <a class="wa-float" href="https://wa.me/923137666766" target="_blank">💬</a>
 
 <script src="data.js"></script>
+<script src="cart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   IH.init();
