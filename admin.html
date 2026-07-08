@@ -197,7 +197,17 @@ body{background:#0f0e0c;color:#f5f3ee;font-family:'Plus Jakarta Sans',sans-serif
 .table-header h3{font-size:.86rem;font-weight:700;color:var(--ink);}
 .table-search{background:var(--bg3);border:1px solid var(--border2);color:var(--ink);padding:6px 11px;border-radius:8px;font-size:.8rem;font-family:'Plus Jakarta Sans',sans-serif;width:160px;min-width:0;}
 .table-search:focus{outline:none;border-color:var(--accent);}
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.table-wrap{
+  overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative;
+  background:
+    linear-gradient(to right, var(--bg2) 30%, rgba(0,0,0,0)),
+    linear-gradient(to right, rgba(0,0,0,0), var(--bg2) 70%) 100% 0,
+    radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.35), rgba(0,0,0,0)),
+    radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.35), rgba(0,0,0,0)) 100% 0;
+  background-repeat:no-repeat;
+  background-size:40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment:local, local, scroll, scroll;
+}
 table{width:100%;border-collapse:collapse;min-width:540px;}
 th{padding:9px 12px;text-align:left;font-size:.64rem;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);font-weight:700;background:var(--bg3);border-bottom:1px solid var(--border);white-space:nowrap;}
 td{padding:10px 12px;font-size:.81rem;color:var(--ink2);border-bottom:1px solid var(--border);}
@@ -373,8 +383,11 @@ select.form-control{cursor:pointer;}
   .user-pill .u-name{display:none;}
 }
 @media(max-width:480px){
-  .stat-grid{grid-template-columns:1fr 1fr;gap:8px;}   /* ← margin:47px 0px hack hata diya */
-  .stat-val{font-size:1.1rem;}
+  .stat-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .stat-card{padding:11px;}
+  .stat-label{font-size:.58rem;letter-spacing:.4px;display:flex;align-items:center;justify-content:space-between;gap:4px;}
+  .stat-val{font-size:1rem;word-break:break-word;}
+  .stat-sub{font-size:.58rem;}
   .top-bar{padding:0 12px;}
   .reset-btn{display:none;}
   .add-btn{font-size:.7rem;padding:6px 10px;}
@@ -384,6 +397,16 @@ select.form-control{cursor:pointer;}
   .table-header{flex-direction:column;align-items:flex-start;}
   .table-search{width:100%;}
   .actions-cell{gap:3px;}
+  .bar-label{width:52px;font-size:.62rem;}
+  .chart-card{padding:12px;}
+  .chart-card h3{font-size:.78rem;}
+  table{min-width:420px;}
+}
+@media(max-width:360px){
+  .stat-grid{grid-template-columns:1fr 1fr;gap:6px;}
+  .stat-card{padding:9px;}
+  .stat-val{font-size:.92rem;}
+  .bar-label{width:44px;font-size:.58rem;}
 }
 /* ══════════════════════════════════════════
    👁 REVEAL / HIDE PAYMENT VALUES
@@ -585,7 +608,7 @@ select.form-control{cursor:pointer;}
   <!-- Receipt -->
     <div class="nav-section">Receipts</div>
     <a class="nav-item" onclick="showPage('receipt',this)"><span class="icon">🧾</span> Add Receipt</a>
-  </nav>
+ 
   <div class="side-bottom">
     <a class="site-link" href="index.html" target="_blank">🌐 View Website →</a>
     <div class="logout-link" onclick="lgLogout()">🚪 Logout (Mobeen)</div>
