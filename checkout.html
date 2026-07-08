@@ -205,19 +205,10 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
   };
 
   try {
-    // 1) Google Sheet mein order save karo + stock update — sirf isi ka wait karo,
-    //    ye order confirm hone ke liye zaroori hai
+    // 1) Google Sheet mein order save karo
     await IH.placeOrder(order);
 
-    // Order confirm ho gaya — user ko turant thankyou page pe bhej do,
-    // emails ka wait mat karo (unhe background mein bhej denge)
-    Cart.clear();
-    hideLoading();
-    window.location.href = 'thankyou.html';
-
-    // 2) EmailJS se customer + store ko emails background mein bhejo (fire-and-forget).
-    //    Ye page redirect hone ke baad bhi complete ho jayenge kyunki request already
-    //    network ko bhej di gayi hai.
+    // 2) Emails bhejo — redirect se PEHLE, await ke sath (yahi asli fix hai)
     const emailPayload = {
       order_id: orderId,
       name:     order.name,
@@ -229,10 +220,16 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
       total:    'Rs ' + subtotal.toLocaleString(),
       items:    itemsText,
     };
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOMER, emailPayload)
-      .catch(function (err) { console.error('Customer email failed:', err); });
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_STORE, emailPayload)
-      .catch(function (err) { console.error('Store email failed:', err); });
+
+    await Promise.allSettled([
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOMER, emailPayload),
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_STORE, emailPayload)
+    ]);
+
+    // 3) Ab redirect karo
+    Cart.clear();
+    hideLoading();
+    window.location.href = 'thankyou.html';
 
   } catch (error) {
     console.error(error);
@@ -241,7 +238,6 @@ document.getElementById('checkoutForm').addEventListener('submit', async functio
     alert('❌ Order failed. Please try again or order via WhatsApp.');
   }
 });
-
 function showLoading() { document.getElementById('loadingPopup').style.display = 'flex'; }
 function hideLoading()  { document.getElementById('loadingPopup').style.display = 'none'; }
 
