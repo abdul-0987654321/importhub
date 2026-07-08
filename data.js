@@ -219,10 +219,15 @@ const IH = (() => {
 
       // Products Sheets se aaye
       if (Array.isArray(pRes) && pRes.length > 0) {
-        _products = pRes.map(normalizeProduct);
+        const fresh   = pRes.map(normalizeProduct);
+        // ── DOUBLE-LOAD FIX: agar cache wala data already same hai to
+        //    dobara render event fire mat karo (warna category/products
+        //    2 dafa "load" hote dikhte hain / flicker karte hain) ──
+        const changed = JSON.stringify(_products) !== JSON.stringify(fresh);
+        _products = fresh;
         saveToCache(); // full object save
         _ready = true;
-        window.dispatchEvent(new CustomEvent('ih_products_updated'));
+        if (changed) window.dispatchEvent(new CustomEvent('ih_products_updated'));
       } else if (_products.length === 0) {
         // Sheets bhi empty aur cache bhi nahi — emergency fallback
         // NOTE: seedDefaultProducts() NAHI chalate — sirf local mein dikhao
@@ -395,6 +400,59 @@ const IH = (() => {
     window.dispatchEvent(new CustomEvent('ih_products_updated'));
   }
 
+  // ════════════════════════════════════════
+  // ORDERS (checkout.html se aate hain)
+  // ════════════════════════════════════════
+  const ORDERS_CACHE_KEY = 'ih_orders_cache';
+
+  function getOrders() {
+    try { return JSON.parse(localStorage.getItem(ORDERS_CACHE_KEY)) || []; }
+    catch (e) { return []; }
+  }
+
+  function getOrderById(orderId) {
+    return getOrders().find(o => o.order_id === orderId) || null;
+  }
+
+  // order = { order_id, name, phone, email, address, city, notes, items:[{id,name,price,qty}], subtotal, shipping, total, payment, date }
+  async function placeOrder(order) {
+    order.order_id = order.order_id || ('IH-' + Date.now());
+    order.date     = order.date || new Date().toISOString();
+
+    // 1) Local receipt cache (thankyou.html isko padhega)
+    const orders = getOrders();
+    orders.push(order);
+    try { localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify(orders)); } catch (e) {}
+    localStorage.setItem('ih_last_order_id', order.order_id);
+
+    // 2) Google Sheet mein order push karo (Apps Script side "addOrder" action honi chahiye)
+    const sheetPayload = {
+      order_id: order.order_id,
+      name:     order.name,
+      phone:    order.phone,
+      email:    order.email,
+      address:  order.address,
+      city:     order.city || '',
+      notes:    order.notes || '',
+      items:    JSON.stringify(order.items || []),
+      subtotal: order.subtotal,
+      shipping: order.shipping || 0,
+      total:    order.total,
+      payment:  order.payment || 'COD',
+      date:     order.date,
+    };
+    const res = await apiCall('addOrder', sheetPayload);
+    if (res && res.error) console.error('Order sheet error:', res.error);
+
+    // 3) Stock kam karo har item ke liye + sale record banao (admin dashboard ke liye)
+    for (const item of (order.items || [])) {
+      try { await recordSale(item.id, item.qty, item.price); }
+      catch (e) { console.warn('recordSale failed for', item.id, e); }
+    }
+
+    return order;
+  }
+
   return {
     init,
     getProducts,
@@ -410,6 +468,9 @@ const IH = (() => {
     pkr,
     waMsg,
     uploadToImgBB,
+    placeOrder,
+    getOrders,
+    getOrderById,
     DEFAULT_PRODUCTS,
   };
 
