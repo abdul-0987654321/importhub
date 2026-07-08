@@ -21,6 +21,11 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,243,238,.96);backdrop-
 .nav-right{display:flex;align-items:center;gap:12px;}
 .wa-btn-nav{background:var(--accent);color:#fff;padding:9px 20px;border-radius:50px;font-size:.85rem;font-weight:700;border:none;display:flex;align-items:center;gap:7px;text-decoration:none;}
 .wa-btn-nav:hover{background:#a83616;}
+.cart-btn{position:relative;background:#fff;color:var(--ink);border:1px solid var(--border);padding:8px 12px;border-radius:40px;cursor:pointer;font-size:16px;line-height:1;transition:.2s;}
+.cart-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+.add-cart-btn{background:var(--ink);color:#fff;padding:6px 12px;border-radius:6px;font-size:.75rem;font-weight:700;border:none;cursor:pointer;transition:.2s;white-space:nowrap;}
+.add-cart-btn:hover{background:var(--accent);}
 .hamburger{display:none;background:none;border:none;cursor:pointer;font-size:1.3rem;}
 .mobile-menu{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);padding:16px 5%;flex-direction:column;gap:4px;z-index:99;}
 .mobile-menu a{color:var(--ink2);text-decoration:none;padding:10px 12px;border-radius:8px;font-weight:500;font-size:.9rem;}
@@ -157,7 +162,8 @@ footer{background:var(--ink);color:rgba(255,255,255,.7);padding:40px 5%;text-ali
     <li><a href="about.html">About</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
-  <div class="nav-right">
+  <div class="nav-right" style="display:flex;align-items:center;gap:10px;">
+    <button onclick="Cart.openDrawer()" class="cart-btn" aria-label="Cart">🛒<span class="cart-count">0</span></button>
     <a class="wa-btn-nav" href="https://wa.me/923137666766" target="_blank">💬 WhatsApp</a>
     <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">☰</button>
   </div>
@@ -268,6 +274,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.7);padding:40px 5%;text-ali
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <script src="data.js"></script>
+<script src="cart.js"></script>
 <script>
   function openSidebar(){
   document.getElementById('sidebar').classList.add('open');
@@ -434,7 +441,7 @@ function updateSideCounts() {
 // ══════════════════════════════════════════════
 // APPLY FILTERS
 // ══════════════════════════════════════════════
-function applyFilters() {
+function applyFilters(resetPage = true) {
   const q = (document.getElementById('searchInput').value||'').toLowerCase();
   const showTech = document.getElementById('ftech').checked;
   const showTour = document.getElementById('ftour').checked;
@@ -486,7 +493,14 @@ function applyFilters() {
 
   document.getElementById('resultCount').textContent =
     filtered.length + ' product' + (filtered.length!==1?'s':'');
-  currentPage = 1;
+
+  const maxPage = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (resetPage) {
+    currentPage = 1;
+  } else if (currentPage > maxPage) {
+    // agar background refresh ke baad list chhoti ho gayi ho to hi clamp karo
+    currentPage = maxPage;
+  }
   renderPage();
 }
 
@@ -520,7 +534,10 @@ function renderPage() {
         ${lowStock?`<div class="stock-low">⚠️ Only ${p.stock} left!</div>`:''}
         <div class="product-footer">
           <span class="price">${IH.pkr(p.price)}</span>
-          <a class="wa-btn" href="https://wa.me/923137666766?text=${IH.waMsg(p.name,p.price)}" target="_blank" onclick="event.stopPropagation()">💬 Order</a>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="add-cart-btn" onclick='event.stopPropagation();Cart.add(${JSON.stringify({id:p.id,name:p.name,price:p.price,img:p.img,emoji:p.emoji}).replace(/'/g,"&#39;")});'>🛒 Add</button>
+            <a class="wa-btn" href="https://wa.me/923137666766?text=${IH.waMsg(p.name,p.price)}" target="_blank" onclick="event.stopPropagation()">💬 Order</a>
+          </div>
         </div>
       </div>
     </div>`;
@@ -580,6 +597,18 @@ document.addEventListener('DOMContentLoaded', function() {
   products = IH.getProducts();
   buildSpecFilters();
   updateSideCounts();
+
+  // ── ?cat=tech/tour/acc link se aaye to wahi tab select karo ──
+  const params  = new URLSearchParams(window.location.search);
+  const catParam = params.get('cat');
+  if (catParam && ['tech','tour','acc'].includes(catParam)) {
+    currentTab = catParam;
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      const map = { all: 0, tech: 1, tour: 2, acc: 3 };
+      b.classList.toggle('active', i === map[catParam]);
+    });
+  }
+
   applyFilters();
 });
 
@@ -587,7 +616,7 @@ window.addEventListener('ih_products_updated', function() {
   products = IH.getProducts();
   buildSpecFilters();
   updateSideCounts();
-  applyFilters();
+  applyFilters(false); // background refresh — user jis page par hai wahi rakho
 });
 </script>
 </body>
