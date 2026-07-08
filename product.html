@@ -120,6 +120,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(248,249,250,.95);backdrop-
 .wa-order-btn:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(37,211,102,.35);}
 .wa-inquiry-btn{width:100%;padding:14px;background:transparent;color:var(--ink);border:2px solid var(--border);border-radius:50px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.3s;text-decoration:none;font-family:'Inter',sans-serif;}
 .wa-inquiry-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(255,71,87,.05);}
+.cart-btn{position:relative;background:#fff;color:var(--ink);border:1px solid var(--border);padding:9px 13px;border-radius:40px;cursor:pointer;font-size:17px;line-height:1;transition:.2s;}
+.cart-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+.qty-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.qty-box{display:flex;align-items:center;border:2px solid var(--border);border-radius:50px;overflow:hidden;}
+.qty-box button{background:var(--bg2);border:none;width:38px;height:38px;font-size:1.1rem;font-weight:700;cursor:pointer;color:var(--ink);}
+.qty-box button:hover{background:var(--accent);color:#fff;}
+.qty-box span{width:40px;text-align:center;font-weight:700;font-size:1rem;}
+.add-cart-order-btn{width:100%;padding:16px;background:var(--ink);color:#fff;border:none;border-radius:50px;font-size:1.02rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;transition:.3s;font-family:'Inter',sans-serif;}
+.add-cart-order-btn:hover{transform:translateY(-4px);background:var(--accent);}
 .seller-box{background:linear-gradient(135deg,#fff,#f9fafb);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:20px;}
 .seller-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
 .seller-av{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:1.1rem;}
@@ -241,7 +251,8 @@ footer{background:linear-gradient(135deg,var(--ink),#1a2332);color:rgba(255,255,
     <li><a href="about.html">About</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
-  <div class="nav-right">
+  <div class="nav-right" style="display:flex;align-items:center;gap:12px;">
+    <button onclick="Cart.openDrawer()" class="cart-btn" aria-label="Cart">🛒<span class="cart-count">0</span></button>
     <a class="wa-btn-nav" href="https://wa.me/923137666766" target="_blank">💬 WhatsApp</a>
     <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">☰</button>
   </div>
@@ -309,6 +320,15 @@ footer{background:linear-gradient(135deg,var(--ink),#1a2332);color:rgba(255,255,
             <span id="stockText">In Stock</span>
           </div>
         </div>
+        <div class="qty-row">
+          <span style="font-weight:600;font-size:.9rem;color:var(--ink2);">Quantity</span>
+          <div class="qty-box">
+            <button type="button" onclick="changeQty(-1)">−</button>
+            <span id="qtyVal">1</span>
+            <button type="button" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <button class="add-cart-order-btn" id="addCartBtn">🛒 Add to Cart</button>
         <a class="wa-order-btn" id="waOrderBtn" href="#" target="_blank">💬 Order on WhatsApp</a>
         <a class="wa-inquiry-btn" id="waInquiryBtn" href="#" target="_blank">💬 Ask a Question</a>
       </div>
@@ -366,6 +386,7 @@ footer{background:linear-gradient(135deg,var(--ink),#1a2332);color:rgba(255,255,
 <a class="wa-float" href="https://wa.me/923137666766?text=Hello ImportHub! I have a question about a product." target="_blank">💬</a>
 
 <script src="data.js"></script>
+<script src="cart.js"></script>
 <script>
 
 const COLOR_MAP = {
@@ -541,6 +562,14 @@ function renderVideos(videos){
 }
 
 // ══════════════════════════════════════
+// QUANTITY SELECTOR
+// ══════════════════════════════════════
+function changeQty(delta) {
+  window.currentQty = Math.max(1, (window.currentQty || 1) + delta);
+  document.getElementById('qtyVal').textContent = window.currentQty;
+}
+
+// ══════════════════════════════════════
 // RENDER PRODUCT — real data aane ke baad
 // ══════════════════════════════════════
 function renderProduct(p) {
@@ -591,6 +620,16 @@ function renderProduct(p) {
   waI.href='https://wa.me/923137666766?text='+waAsk(p.name);
   waO.style.opacity='';waO.style.pointerEvents='';
   waI.style.opacity='';waI.style.pointerEvents='';
+
+  // Cart — quantity + add to cart
+  window.currentQty = 1;
+  document.getElementById('qtyVal').textContent = '1';
+  const addCartBtn = document.getElementById('addCartBtn');
+  addCartBtn.onclick = function () {
+    for (let i = 0; i < window.currentQty; i++) {
+      Cart.add({ id: p.id, name: p.name, price: p.price, img: p.img || '', emoji: p.emoji || '' });
+    }
+  };
 
   // Stock
   const stockDot  = document.getElementById('stockDot');
